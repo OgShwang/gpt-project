@@ -1,28 +1,31 @@
-# data_preprocessing.py
-
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
-def load_data():
-    # Load dataset from CSV file
-    df = pd.read_csv('data/dataset.csv')
-    return df
-
-def clean_data(df):
-    # Handle missing values (e.g., fill with mean or drop)
-    df = df.fillna(df.mean())  # Example: fill missing values with the mean of the column
-    return df
-
-def preprocess_data(df):
-    # Example of preprocessing steps: scaling or encoding
-    # If you have any categorical data, you can encode it here
-    # Example: Encoding categorical variables if any
-    # df = pd.get_dummies(df, drop_first=True)
+# Function to load and preprocess the data
+def preprocess_data(file_path):
+    # Load the dataset
+    df = pd.read_csv(file_path)
     
-    return df
+    # Example: Fill missing values with the mean (if any)
+    df.fillna(df.mean(), inplace=True)
 
-# Example usage:
-if __name__ == '__main__':
-    data = load_data()
-    clean_data = clean_data(data)
-    preprocessed_data = preprocess_data(clean_data)
-    print(preprocessed_data.head())
+    # Example: Encoding categorical variables (if needed)
+    # Here we have Column2, which is categorical, so we’ll use label encoding as an example.
+    df['Column2'] = df['Column2'].astype('category').cat.codes
+
+    # Example: Feature scaling (normalization)
+    scaler = StandardScaler()
+    df[['Column1', 'Column3']] = scaler.fit_transform(df[['Column1', 'Column3']])
+
+    # Split into features (X) and target (y)
+    X = df[['Column1', 'Column2']]  # Features
+    y = df['Column3']  # Target variable
+
+    # Split into training and testing sets (80% train, 20% test)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    return X_train, X_test, y_train, y_test
+
+# If you want to test the preprocessing function:
+# X_train, X_test, y_train, y_test = preprocess_data('/content/gpt-project/data/dataset.csv')
